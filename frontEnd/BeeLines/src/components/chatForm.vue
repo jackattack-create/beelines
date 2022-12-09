@@ -13,6 +13,7 @@
             addLog: function(item) {
                 console.log(item)
                 this.ChatLog.push(item)
+                
             }
         }
     }
@@ -29,6 +30,7 @@
         v-on:submit="(event) => {
             event.preventDefault(); 
             addLog(ChatLogItem)
+            ChatLogItem = ''
         }"
     >
         <div id="chatInput">
@@ -41,7 +43,6 @@
                 }" 
                 @submit="(event) => {
                     ChatLogItem = event.target.value
-                   
                 }"
             />
         </div>
