@@ -6,42 +6,58 @@ const {IamAuthenticator} = require('ibm-watson/auth');
 
 //Create Instance of Assistant 
 
-//First Auth
-// const authenticator = new IamAuthenticator({
-//     apikey: `Ml2xxJX4OHwdWJxsTrxSPQ-2IuTj1FgeHOgsjIJrOTo4`,
-// })
-
-//Connect to assistant
-// const assistant = new AssistantV2({
-//     version: '2021-11-27',
-//     serviceName: 'assistant',
-//     authenticator: authenticator,
-//     url: "https://api.us-east.assistant.watson.cloud.ibm.com/instances/5afbfd57-0e34-4b35-bae1-02250302d6b1",
-// })
-
 const assistant = new AssistantV2({
     version: '2021-11-27',
     authenticator: new IamAuthenticator({
-      apikey: 'Xu-Rw5hpriOXNKY7x1zyGQ07FjP0TdHfg1-l8vz9Fic1',
+      apikey: process.env.WATSON_ASSISTANT_APIKEY,
     }),
-    serviceUrl: 'https://api.us-east.assistant.watson.cloud.ibm.com/instances/5afbfd57-0e34-4b35-bae1-02250302d6b1',
+    serviceUrl: process.env.WATSON_ASSISTANT_URL,
   });
 
 //Route to handle session tokens
 //GET REQUESTS 
 router.get("/session", async (req, res) => {
+    console.log("Getting session ... ")
+    // console.log(assistant)
     try {
+        console.log("Got Session!")
         const session = await assistant.createSession({
-            assistantId:"d975944c-94ae-461a-83ac-2d730b07ae0d"
+            assistantId:process.env.WATSON_ASSISTANT_ID
         })
         res.json(session['result'])
     } catch (err) {
+        console.log("There was an error ... ")
         res.send("There was an error processing your request.");
         console.log(err);
     }
 })
 
 //Handle Messages
+router.post('/message', async (req,res) => {
+
+    console.log('Trying to send message')
+
+    //construct payload
+    payload = {
+        assistantId: process.env.WATSON_ASSISTANT_ID,
+        sessionId: req.headers.session_id,
+        input: {
+            message_type:"text",
+            text: req.body.input
+        }
+    }
+
+    try {
+        console.log("message Sent!")
+        const message = await assistant.message(payload);
+        res.json(message['result'])
+    } catch (err) {
+        console.log("There was an error with sending a message... ")
+        res.send("There was an error processing your request.");
+        console.log(err);
+    }
+
+})
 
 //Export Routes
 module.exports = router
