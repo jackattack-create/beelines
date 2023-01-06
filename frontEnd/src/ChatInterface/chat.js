@@ -18,51 +18,72 @@ const ChatFace = ({session}) => {
     ])
     const [calVal, setCalVal] = useState(new Date())
 
+    const onChange = date => { 
+        setCalVal(date)
+
+        const day = calVal.getDate()
+        const month = calVal.getMonth() + 1
+        const year = calVal.getFullYear()
+        const dateToPass = `${month} ${day} ${year} `
+                    
+        console.log('Clicked day!', day, month, year)
+        sendMessage(dateToPass, session)
+        revealCalander(false)
+    }
+
     
 
 
     //checks responses to messages we sen to the api and gets the response type
-    const checkResponseType = (WatsonRes) => {
-        // setChatLog([WatsonRes[0].text]) 
+    const checkResponseType = (WatsonRes, chatMessage) => {
+        
+        console.log(WatsonRes.title)
+        // if (WatsonRes.title !== null) {
+        //     setChatLog([...chatlog, chatMessage, WatsonRes.title]);
+        // }
         for (let i = 0; i <= WatsonRes.length; i++) {
             const responseData = WatsonRes[i]
             console.log(responseData.response_type)
-            
 
+            
+            
+            
             //trying out switch staments
             // return a function that corrisponds to what type of response we're getting
             // done: option (minus the part that clears it) and text and calander
             
             switch (responseData.response_type) {
                 case "option":
+                    
                     showOptions(responseData.options);
                     break;
                 case 'text':
                     console.log(responseData.text)
                     setChatRes(responseData.text);
-                    setChatLog([...chatlog, responseData.text]);
+                    setChatLog([...chatlog, chatMessage, responseData.text]);
                     break;
                 case 'date': 
                     console.log(responseData)
                     revealCalander(true)
                     break;
+                case 'connect_to_agent':
+                    console.log('calling agent')
+                    break;
                 default:
                     console.log('cannot read type or it does not match option or text', responseData.response_type)
                     break;
+                        
+                    }
+                }
 
-            }
-        }
+        
     }
 
    
-
     //if response type is 'options': create an array that can be looped over for response buttons
     const showOptions = (response) => {
-        console.log(response)
         setUserOptions([])
         setUserOptions([...response])
-        console.log(userOptions)
-        // setChatLog([...chatlog, userOptions])
     }
     
     
@@ -76,14 +97,9 @@ const ChatFace = ({session}) => {
                 }
             })
             .then((response) => {
+                console.log(response)
                 const newChatRes = response.data.output.generic
-                checkResponseType(newChatRes)
-                // setChatLog([...chatlog, message, chatRes])
-                // checkResponseType(newChatRes)
-                
-                // setChatRes(newChatRes)
-                // setChatLog([...chatlog, message, newChatRes])
-                // console.log(response.data.output)
+                checkResponseType(newChatRes, chatMessage)
                 
             }).catch(err => {console.log(err)})  
         } catch (error) {
@@ -97,6 +113,8 @@ const ChatFace = ({session}) => {
         setMessage('')
     }
 
+
+
     return <div id="chatPage">
         <div id="chatLog">
             {chatlog.map((chat) => {
@@ -107,17 +125,16 @@ const ChatFace = ({session}) => {
         {
             calander === true ?
             <Calendar 
-                // value={calVal}
-                // activeStartDate={calVal}
-                onClickDay={(event, value) => {
-                    
-                    console.log('Clicked day!', value)
-                    sendMessage(calVal, session)
-                    revealCalander(false)
-                }}
+                // onChange={onChange}
+                value={calVal}
+                activeStartDate={calVal}
+                onClickDay={
+                    onChange
+                }
             /> : null
 
         }
+
         {/* Options for when the response returns with options to make buttons out of */}
         <div>
             {userOptions ? 
@@ -142,6 +159,7 @@ const ChatFace = ({session}) => {
                 null
             )}
         </div>
+
         <form 
             id="chatInput"
             onSubmit={(event, session) => {
@@ -159,7 +177,9 @@ const ChatFace = ({session}) => {
                     setMessage(event.target.value)
                 }}/>
         </form>
+
     </div>
+
 }
 
 export default ChatFace
