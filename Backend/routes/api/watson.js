@@ -17,8 +17,6 @@ const assistant = new AssistantV2({
 //Route to handle session tokens
 //GET REQUESTS 
 router.get("/session", async (req, res) => {
-    // console.log("Getting session ... ")
-    // console.log(assistant)
     try {
         // console.log("Got Session!")
         const session = await assistant.createSession({

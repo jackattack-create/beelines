@@ -11,9 +11,11 @@ app.use(cors())
 
 // 2. Import routes for api
 const watsonRoutes = require("./routes/api/watson")
+const db2Routes = require('./routes/api/db2')
 
 // 2.1 Direct Requests to /api/watson Routes
 app.use("/api/watson", watsonRoutes)
+app.use('/api/db2', db2Routes)
 
 
 // 3. Start server
